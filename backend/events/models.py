@@ -162,7 +162,7 @@ class Event(models.Model):
         Speaker,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='event',
+        related_name='event_speaker',
         verbose_name='Спикер',
     )
     price = models.DecimalField(

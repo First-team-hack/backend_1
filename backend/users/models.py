@@ -3,6 +3,7 @@ from django.db import models
 
 import uuid
 
+
 class User(AbstractUser):
     last_name = models.CharField(max_length=255, verbose_name='Фамилия')
     first_name = models.CharField(max_length=255, verbose_name='Имя')
@@ -24,6 +25,7 @@ class User(AbstractUser):
         null=True,
         blank=True
     )
+
     def __str__(self) -> str:
         return self.get_full_name()
 
@@ -45,7 +47,7 @@ class RecommendedActivities(models.Model):
         unique=True
     )
     event = models.ForeignKey(
-        'Event',
+        'events.Event',
         max_length=50,
         on_delete=models.CASCADE,
         related_name='events'
@@ -67,17 +69,17 @@ class SelectedEvents(models.Model):
         unique=True
     )
     event = models.ForeignKey(
-        'Event',
+        'events.Event',
         max_length=50,
         on_delete=models.CASCADE,
-        related_name='events'
+        related_name='selected_events_events'
 
     )
     user = models.ForeignKey(
         'User',
         max_length=50,
         on_delete=models.CASCADE,
-        related_name='user'
+        related_name='selected_events_user'
     )
 
 
@@ -89,17 +91,17 @@ class UserActivities(models.Model):
         unique=True
     )
     event = models.ForeignKey(
-        'Event',
+        'events.Event',
         max_length=50,
         on_delete=models.CASCADE,
-        related_name='events'
+        related_name='user_activities_events'
 
     )
     user = models.ForeignKey(
         'User',
         max_length=50,
         on_delete=models.CASCADE,
-        related_name='user'
+        related_name='user_activities_user'
     )
 
 
@@ -121,5 +123,5 @@ class Notifications(models.Model):
         'User',
         max_length=50,
         on_delete=models.CASCADE,
-        related_name='user'
+        related_name='notifications_user'
     )
