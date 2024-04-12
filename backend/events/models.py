@@ -1,6 +1,7 @@
 from django.db import models
 
 from .choices import TYPES_CHOICES, STATUS_CHOICES
+from users.models import User
 
 
 class Speaker(models.Model):
@@ -92,7 +93,7 @@ class Broadcast(models.Model):
 
 
 class City(models.Model):
-    """ Модель для названий городов """
+    ''' Модель для названий городов '''
 
     name = models.CharField(max_length=255, verbose_name='Название города')
 
@@ -205,3 +206,34 @@ class Event(models.Model):
     class Meta:
         verbose_name = 'Мероприятие'
         verbose_name_plural = 'Мероприятия'
+
+
+class Favorite(models.Model):
+    ''' Модель для добавления мероприятий в избранное.'''
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Мероприятие'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Пользователь'
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        ordering = ('id',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=['user', 'event'],
+                name='unique_favorite_recipe'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.event} в избранном у {self.user}'

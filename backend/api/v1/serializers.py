@@ -1,24 +1,46 @@
-from rest_framework import serializers
-
 from users.models import User, UserActivities
-from events.models import Event
+from events.models import (
+    Event,
+    Speaker,
+    Questionnaire,
+    Adress,
+    Favorite,
+)
+from events.choices import TYPES_CHOICES, STATUS_CHOICES
+
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class SpeakerSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = User
-        fields = [
-            'first_name',
-            'last_name',
-            'middle_name',
-            'email',
-            'phone',
-            'post',
-            'interests'
-        ]
+        model = Speaker
+        fields = ('id', 'names')
 
 
-class EventSerializer(serializers.ModelSerializer):
+class QuestionnaireSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Questionnaire
+        fields = '__all__'
+
+
+class AdresSerializer(serializers.ModelSerializer):
+
+    type_event = serializers.ChoiceField(
+        choices=TYPES_CHOICES,
+        required=False,
+    )
+    city = serializers.CharField()
+
+    class Meta:
+        model = Adress
+        fields = '__all__'
+
+
+class EventShortSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Event
         fields = [
@@ -33,6 +55,51 @@ class EventSerializer(serializers.ModelSerializer):
             'status',
             'speaker',
             'price'
+        ]
+
+
+class EventSerializer(serializers.ModelSerializer):
+
+    type_event = serializers.ChoiceField(
+        choices=TYPES_CHOICES,
+        required=False,
+    )
+    speaker = SpeakerSerializer(many=True)
+    adress = AdresSerializer()
+    status = serializers.ChoiceField(
+        choices=STATUS_CHOICES,
+        required=False,
+    )
+
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+            )
+        ]
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'middle_name',
+            'email',
+            'phone',
+            'post',
+            'interests'
         ]
 
 
