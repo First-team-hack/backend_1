@@ -1,3 +1,4 @@
+from users.models import User, UserActivities
 from events.models import (
     Event,
     Speaker,
@@ -42,14 +43,19 @@ class EventShortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = (
+        fields = [
             'id',
-            'name',
+            'topic',
+            'program',
             'type_event',
+            'name',
             'date',
-            'speaker',
+            'time',
             'adress',
-        )
+            'status',
+            'speaker',
+            'price'
+        ]
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -81,3 +87,24 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 fields=('user', 'recipe'),
             )
         ]
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'middle_name',
+            'email',
+            'phone',
+            'post',
+            'interests'
+        ]
+
+
+# Пока сделан только чтоб в базу данные закидывать
+class UserActivitiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserActivities
+        fields = '__all__'
