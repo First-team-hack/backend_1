@@ -5,9 +5,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
+from v1.views import EventsViewSet
+
 app_name = 'api'
 
 router = DefaultRouter()
+router.register(r'events', EventsViewSet)
 
 decorated_login_view = swagger_auto_schema(
     method='POST',
