@@ -49,22 +49,30 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class UserEventsViewSet(viewsets.ViewSet):
     """Вьюсет мероприятий пользователя"""
-    def list(self, request, user_id):
+
+    def list(self, request):
+        url_name = request.resolver_match.url_name
+        print(url_name)
         user_activities = UserActivities.objects.filter(
-            user=user_id).values('event')
+            user=request.user.id).values('event')
 
         events_queryset = Event.objects.filter(pk__in=user_activities)
-        serializer = serializers.EventSerializer(events_queryset, many=True)
+        if url_name == 'user_events-list':
+            serializer = serializers.EventSerializer(
+                events_queryset, many=True)
 
-        events_data = serializer.data
+            events_data = serializer.data
 
-        response_data = {
-            "success": True,
-            "code": 200,
-            "events": events_data
-        }
+            return Response(events_data)
+        if url_name == 'user_completed_events-list':
+            completed_events_queryset = events_queryset.filter(
+                status='completed')
+            serializer = serializers.EventSerializer(
+                completed_events_queryset, many=True)
 
-        return Response(response_data)
+            events_data = serializer.data
+
+            return Response(events_data)
 
 
 # Пока сделан только чтоб в базу данные закидывать
