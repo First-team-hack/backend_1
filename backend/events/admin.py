@@ -33,7 +33,9 @@ class AdressAdmin(admin.ModelAdmin):
 class SpeakerAdmin(admin.ModelAdmin):
 
     list_display = (
-        'names',
+        'first_name',
+        'last_name',
+        'middle_name',
         'phone',
         'email',
         'post',
@@ -48,7 +50,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 @admin.register(Broadcast)
 class BroadcastAdmin(admin.ModelAdmin):
 
-    list_display = ('type_event')
+    list_display = ('type_event',)
 
 
 @admin.register(Chat)
