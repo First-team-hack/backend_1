@@ -201,7 +201,7 @@ class Event(models.Model):
     )
     theme = models.CharField(
         max_length=50,
-        choices=TYPES_CHOICES,
+        choices=THEME_CHOICES,
         verbose_name='Тема мероприятия',)
 
     def __str__(self):
