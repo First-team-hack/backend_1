@@ -1,6 +1,6 @@
 from django.db import models
 
-from .choices import TYPES_CHOICES, STATUS_CHOICES
+from .choices import TYPES_CHOICES, STATUS_CHOICES, THEME_CHOICES
 from users.models import User
 
 
@@ -199,6 +199,10 @@ class Event(models.Model):
         related_name='event',
         verbose_name='Адрес',
     )
+    theme = models.CharField(
+        max_length=50,
+        choices=TYPES_CHOICES,
+        verbose_name='Тема мероприятия',)
 
     def __str__(self):
         return self.name

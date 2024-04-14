@@ -1,4 +1,4 @@
-from users.models import User, UserActivities
+from users.models import User, UserActivities, SelectedEvents
 from events.models import (
     Event,
     Speaker,
@@ -89,18 +89,54 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    registeredEvents = serializers.SerializerMethodField()
+    favoriteEvents = serializers.SerializerMethodField()
+    recommendedEvents = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
-            'first_name',
-            'last_name',
-            'middle_name',
+            'id',
+            'username',
+            'firstName',
+            'lastName',
             'email',
-            'phone',
-            'post',
-            'interests'
+            'phoneNumber',
+            'interest',
+            'notificationByTelegram',
+            'notificationByWhatsapp',
+            'notificationByVk',
+            'notificationByViber',
+            'telegram',
+            'whatsapp',
+            'vk',
+            'viber',
+            'registeredEvents',
+            'favoriteEvents',
+            'recommendedEvents'
         ]
+
+    def get_registeredEvents(self, obj):
+        user_activities = UserActivities.objects.filter(
+            user=self.context.user.id).values('event')
+        registeredEvents = Event.objects.filter(pk__in=user_activities)
+        serialized_events = EventSerializer(registeredEvents, many=True)
+        return serialized_events.data
+
+    def get_favoriteEvents(self, obj):
+        user_favorites = SelectedEvents.objects.filter(
+            user=self.context.user.id).values('event')
+        favorite_events = Event.objects.filter(pk__in=user_favorites)
+        serialized_events = EventSerializer(favorite_events, many=True)
+        return serialized_events.data
+
+    def get_recommendedEvents(self, obj):
+        user_recommended = Event.objects.filter(
+            theme=self.context.user.interest)
+        recommended_events = Event.objects.filter(pk__in=user_recommended)
+        serialized_events = EventSerializer(recommended_events, many=True)
+        return serialized_events.data
 
 
 # Пока сделан только чтоб в базу данные закидывать

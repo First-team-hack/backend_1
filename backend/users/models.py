@@ -1,27 +1,52 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from .choices import INTEREST_CHOICES
 
 import uuid
 
 
 class User(AbstractUser):
-    last_name = models.CharField(max_length=255, verbose_name='Фамилия')
-    first_name = models.CharField(max_length=255, verbose_name='Имя')
-    middle_name = models.CharField(max_length=255, verbose_name='Отчество')
-    phone = models.CharField(
+    firstName = models.CharField(max_length=255, verbose_name='Имя')
+    lastName = models.CharField(max_length=255, verbose_name='Фамилия')
+    email = models.EmailField(unique=True, db_index=True)
+    phoneNumber = models.CharField(
         verbose_name="Телефон",
         max_length=20,
     )
-    email = models.EmailField(unique=True, db_index=True)
-    post = models.CharField(
+    interest = models.CharField(
         max_length=255,
-        verbose_name='Должность',
+        verbose_name='Интересы',
+        choices=INTEREST_CHOICES,
         null=True,
         blank=True
     )
-    interests = models.CharField(
-        max_length=255,
-        verbose_name='Интересы',
+
+    notificationByTelegram = models.BooleanField(null=True,
+                                                 blank=True)
+    notificationByWhatsapp = models.BooleanField(null=True,
+                                                 blank=True)
+    notificationByVk = models.BooleanField(null=True,
+                                           blank=True)
+    notificationByViber = models.BooleanField(null=True,
+                                              blank=True)
+
+    telegram = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True
+    )
+    whatsapp = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True
+    )
+    vk = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True
+    )
+    viber = models.CharField(
+        max_length=20,
         null=True,
         blank=True
     )
@@ -33,7 +58,7 @@ class User(AbstractUser):
         """ФИО."""
         names = [
             name
-            for name in (self.last_name, self.first_name, self.middle_name)
+            for name in (self.last_name, self.first_name)
             if name is not None
         ]
         return " ".join(names)

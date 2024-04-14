@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from users.models import User, UserActivities
+from users.models import (User,
+                          UserActivities)
 from events.models import Event, Favorite
 
 from . import serializers
@@ -41,10 +43,24 @@ class EventsViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """Простой вьюсет для пользователя."""
-    queryset = User.objects.all()
-    serializer_class = serializers.UserUpdateSerializer
+class UserViewSet(APIView):
+    """Вьюсет для пользователя."""
+
+    def get(self, request):
+        user = User.objects.get(id=request.user.id)
+
+        serializer = serializers.UserSerializer(
+            user, context=self.request)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        user = User.objects.get(id=request.user.id)
+        serializer = serializers.UserSerializer(
+            user, data=request.data, partial=True, context=self.request)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserEventsViewSet(viewsets.ViewSet):
@@ -52,7 +68,6 @@ class UserEventsViewSet(viewsets.ViewSet):
 
     def list(self, request):
         url_name = request.resolver_match.url_name
-        print(url_name)
         user_activities = UserActivities.objects.filter(
             user=request.user.id).values('event')
 
