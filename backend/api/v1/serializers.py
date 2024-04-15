@@ -139,8 +139,25 @@ class UserSerializer(serializers.ModelSerializer):
         return serialized_events.data
 
 
-# Пока сделан только чтоб в базу данные закидывать
+class RegisteredEventSerializer(serializers.ModelSerializer):
+    event = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserActivities
+        fields = ['event']
+
+    def get_event(self, obj):
+        print(self)
+
+
+# Пока сделаны только чтоб в базу данные закидывать
 class UserActivitiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserActivities
+        fields = '__all__'
+
+
+class UserFavoritesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SelectedEvents
         fields = '__all__'
