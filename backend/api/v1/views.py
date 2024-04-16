@@ -30,13 +30,10 @@ class EventsView(APIView):
         queryset = Event.objects.all()
         if format:
             queryset = queryset.filter(format=format)
-            print(queryset)
         if theme:
             queryset = queryset.filter(themes=theme)
-            print(queryset)
         if city:
             queryset = queryset.filter(city=city)
-            print(queryset)
         if keyword:
             result_queryset = Event.objects.none()
             for event in queryset:
@@ -209,7 +206,6 @@ class FavoritesEventsView(APIView):
         try:
             event = SelectedEvents.objects.filter(
                 event=request.data['event_id'])
-            print(event)
         except SelectedEvents.DoesNotExist:
             return Response({'error': 'Объект не найден'},
                             status=status.HTTP_404_NOT_FOUND)
