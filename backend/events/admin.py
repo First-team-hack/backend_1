@@ -72,17 +72,13 @@ class Questionnaire(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
 
     list_display = (
-        'topic',
-        'program',
-        'type_event',
-        'name',
+        'title',
+        'themes',
+        'format',
+        'title',
         'date',
         'time',
         'status',
-        'speaker',
-        'price',
-        'questionnaire',
-        'chat',
-        'broadcast',
-        'adress',
+        'speakerDescription',
+        'seatsLeft',
     )

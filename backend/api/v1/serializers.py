@@ -64,8 +64,6 @@ class EventSerializer(serializers.ModelSerializer):
         choices=TYPES_CHOICES,
         required=False,
     )
-    speaker = SpeakerSerializer(many=True)
-    adress = AdresSerializer()
     status = serializers.ChoiceField(
         choices=STATUS_CHOICES,
         required=False,
@@ -133,7 +131,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_recommendedEvents(self, obj):
         user_recommended = Event.objects.filter(
-            theme=self.context.user.interest)
+            themes=self.context.user.interest)
         recommended_events = Event.objects.filter(pk__in=user_recommended)
         serialized_events = EventSerializer(recommended_events, many=True)
         return serialized_events.data
@@ -147,7 +145,18 @@ class RegisteredEventSerializer(serializers.ModelSerializer):
         fields = ['event']
 
     def get_event(self, obj):
-        print(self)
+        pass
+
+
+class FavoritesEventSerializer(serializers.ModelSerializer):
+    event = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SelectedEvents
+        fields = ['event']
+
+    def get_event(self, obj):
+        pass
 
 
 # Пока сделаны только чтоб в базу данные закидывать

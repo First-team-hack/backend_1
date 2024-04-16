@@ -1,6 +1,10 @@
 from django.db import models
 
-from .choices import TYPES_CHOICES, STATUS_CHOICES, THEME_CHOICES
+from .choices import (TYPES_CHOICES,
+                      STATUS_CHOICES,
+                      THEME_CHOICES,
+                      COLOR_CHOICES,
+                      CITY_CHOICES)
 from users.models import User
 
 
@@ -126,23 +130,23 @@ class Adress(models.Model):
 
 class Event(models.Model):
     ''' Модель мероприятия '''
-
-    topic = models.CharField(
+    title = models.CharField(
         max_length=255,
-        verbose_name='Тема',
+        verbose_name='Название',
     )
-    program = models.CharField(
+    speakerDescription = models.CharField(
         max_length=255,
-        verbose_name='Программа',
+        verbose_name='Описание спикера',
     )
-    type_event = models.CharField(
+    format = models.CharField(
         max_length=50,
         choices=TYPES_CHOICES,
         verbose_name='Тип мероприятия',
     )
-    name = models.CharField(
-        max_length=255,
-        verbose_name='Название',
+    status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+        verbose_name='Статус мероприятия',
     )
     date = models.DateField(
         verbose_name='дата',
@@ -154,58 +158,34 @@ class Event(models.Model):
         blank=False,
         null=False,
     )
-    status = models.CharField(
+    city = models.CharField(
         max_length=50,
-        choices=STATUS_CHOICES,
-        verbose_name='Статус мероприятия',
+        choices=CITY_CHOICES,
+        verbose_name='Город',
     )
-    speaker = models.OneToOneField(
-        Speaker,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='event_speaker',
-        verbose_name='Спикер',
-    )
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name='Стоимость',
-    )
-    questionnaire = models.OneToOneField(
-        Questionnaire,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='event',
-        verbose_name='Опрос',
-    )
-    chat = models.OneToOneField(
-        Chat,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='event',
-        verbose_name='Чат',
-    )
-    broadcast = models.OneToOneField(
-        Broadcast,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='event',
-        verbose_name='Трансляция',
-    )
-    adress = models.ForeignKey(
-        Adress,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='event',
+    address = models.CharField(
+        max_length=255,
         verbose_name='Адрес',
     )
-    theme = models.CharField(
+    seatsLeft = models.IntegerField(
+        verbose_name='Количество мест',
+    )
+    colorTheme = models.IntegerField(
+        choices=COLOR_CHOICES,
+        verbose_name='Цветовая тема',
+    )
+    duration = models.TimeField(
+        verbose_name='Продолжительность',
+        blank=False,
+        null=False,
+    )
+    themes = models.CharField(
         max_length=50,
         choices=THEME_CHOICES,
         verbose_name='Тема мероприятия',)
 
     def __str__(self):
-        return self.name
+        return self.title
 
     class Meta:
         verbose_name = 'Мероприятие'
