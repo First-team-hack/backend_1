@@ -13,6 +13,52 @@ from . import serializers
 from .serializers import EventSerializer, FavoriteSerializer
 
 
+class EventsView(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        data = request.data
+        try:
+            format = data['format']
+            theme = data['theme']
+            city = data['city']
+            keyword = data['keyword']
+            sort = data['sort']
+        except Exception:
+            return Response('Проверте передаваемые данные!',
+                            status=status.HTTP_400_BAD_REQUEST)
+        queryset = Event.objects.all()
+        if format:
+            queryset = queryset.filter(format=format)
+            print(queryset)
+        if theme:
+            queryset = queryset.filter(themes=theme)
+            print(queryset)
+        if city:
+            queryset = queryset.filter(city=city)
+            print(queryset)
+        if keyword:
+            result_queryset = Event.objects.none()
+            for event in queryset:
+                fields = event.__dict__
+                for key, val in fields.items():
+                    if type(val) is str:
+                        if keyword in val:
+                            result_queryset = (
+                                result_queryset | Event.objects.filter(
+                                    id=event.id))
+            queryset = result_queryset
+
+        if sort:
+            if sort == 'date':
+                queryset = queryset.order_by('date').reverse()
+            if sort == 'name':
+                queryset = queryset.order_by('title')
+
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class EventsViewSet(viewsets.ModelViewSet):
 
     queryset = Event.objects.all()
@@ -77,16 +123,13 @@ class RegisteredEventsView(APIView):
         events = None
         for event_id in events_ids:
             events = Event.objects.filter(id=event_id['event'])
-        print(events)
         serialized_event = serializers.EventSerializer(events, many=True)
         return Response(
             serialized_event.data, status=status.HTTP_200_OK
         )
 
     def post(self, request):
-        print('POSTsosal')
         data = request.data
-        print(data)
         already_registered = UserActivities.objects.filter(
             user=request.user.id,
             event=data['event_id']
@@ -112,7 +155,6 @@ class RegisteredEventsView(APIView):
         try:
             event = UserActivities.objects.filter(
                 event=request.data['event_id'])
-            print(event)
         except UserActivities.DoesNotExist:
             return Response({'error': 'Объект не найден'},
                             status=status.HTTP_404_NOT_FOUND)
@@ -121,6 +163,77 @@ class RegisteredEventsView(APIView):
 
         return Response({'message': 'Deleted'},
                         status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoritesEventsView(APIView):
+    """Вью избранных ивентов пользователя."""
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SelectedEvents.objects.all()
+    serializer_class = serializers.FavoritesEventSerializer
+
+    def get(self, request):
+        events_ids = SelectedEvents.objects.filter(
+            user=request.user.id).values('event')
+        events = None
+        for event_id in events_ids:
+            events = Event.objects.filter(id=event_id['event'])
+        serialized_event = serializers.EventSerializer(events, many=True)
+        return Response(
+            serialized_event.data, status=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        data = request.data
+        already_in_favorites = SelectedEvents.objects.filter(
+            user=request.user.id,
+            event=data['event_id']
+        )
+        serializer = serializers.UserFavoritesSerializer(
+            data={'user': request.user.id, 'event': data['event_id']}
+        )
+        if len(already_in_favorites) > 0:
+            event = get_object_or_404(Event, id=data['event_id'])
+            event_serializer = serializers.EventSerializer(event)
+            return Response(
+                event_serializer.data, status=status.HTTP_201_CREATED
+            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        event = get_object_or_404(Event, id=data['event_id'])
+        event_serializer = serializers.EventSerializer(event)
+        return Response(
+            event_serializer.data, status=status.HTTP_201_CREATED
+        )
+
+    def delete(self, request):
+        try:
+            event = SelectedEvents.objects.filter(
+                event=request.data['event_id'])
+            print(event)
+        except SelectedEvents.DoesNotExist:
+            return Response({'error': 'Объект не найден'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        event.delete()
+
+        return Response({'message': 'Deleted'},
+                        status=status.HTTP_204_NO_CONTENT)
+
+
+class RecommendedEventsView(APIView):
+    """Вью рекомендованных ивентов пользователя."""
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = SelectedEvents.objects.all()
+    serializer_class = serializers.FavoritesEventSerializer
+
+    def get(self, request):
+        user_recommended = Event.objects.filter(
+            themes=request.user.interest)
+        recommended_events = Event.objects.filter(pk__in=user_recommended)
+        serialized_events = EventSerializer(recommended_events, many=True)
+        return Response(
+            serialized_events.data, status=status.HTTP_200_OK
+        )
 
 
 class UserEventsViewSet(viewsets.ViewSet):
@@ -150,7 +263,16 @@ class UserEventsViewSet(viewsets.ViewSet):
             return Response(events_data)
 
 
+class CompletedEventsView(APIView):
+    def get(self, request):
+        queryset = Event.objects.filter(status='completed')
+        serializer = EventSerializer(queryset, many=True)
+        events_data = serializer.data
+        return Response(events_data)
+
 # Пока сделаны только чтоб в базу данные закидывать
+
+
 class UserActivitiesViewSet(viewsets.ModelViewSet):
     """Вьюсет для записей в UserActivities."""
     queryset = UserActivities.objects.all()

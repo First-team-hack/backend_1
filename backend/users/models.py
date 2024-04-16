@@ -11,7 +11,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, db_index=True)
     phoneNumber = models.CharField(
         verbose_name="Телефон",
-        max_length=20,
+        max_length=10,
     )
     interest = models.CharField(
         max_length=255,
@@ -31,22 +31,22 @@ class User(AbstractUser):
                                               blank=True)
 
     telegram = models.CharField(
-        max_length=20,
+        max_length=50,
         null=True,
         blank=True
     )
     whatsapp = models.CharField(
-        max_length=20,
+        max_length=50,
         null=True,
         blank=True
     )
     vk = models.CharField(
-        max_length=20,
+        max_length=50,
         null=True,
         blank=True
     )
     viber = models.CharField(
-        max_length=20,
+        max_length=50,
         null=True,
         blank=True
     )
