@@ -1,4 +1,3 @@
-# backend_1
 ## Клонируйте репозиторий
 git clone git@github.com:First-team-hack/backend_1.git
 ## Для запуска проекта:<br />
